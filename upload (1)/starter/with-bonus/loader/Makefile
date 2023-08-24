@@ -1,5 +1,5 @@
 COMPILER = gcc
-FLAGS = -m32 -shared -fPIC
+FLAGS = -m32 -shared -fPIC -c
 SOURCES = loader.c
 FILE = simplerloader.so
 
