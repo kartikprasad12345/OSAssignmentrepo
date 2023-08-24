@@ -1,13 +1,13 @@
-CC = gcc
-CFLAGS = -m32 -shared -fPIC
+COMPILER = gcc
+FLAGS = -m32 -shared -fPIC
 SOURCES = loader.c
-OUTPUT = simplerloader.so
+FILE = simplerloader.so
 
-all: $(OUTPUT)
+all: $(FILE)
 
-$(OUTPUT): $(SOURCES)
-	$(CC) $(CFLAGS) -o $@ $^
+$(FILE): $(SOURCES)
+	$(COMPILER) $(FLAGS) -o $@ $^
 
 clean:
-	-@rm -f $(OUTPUT)
+	-@rm -f $(FILE)
 
