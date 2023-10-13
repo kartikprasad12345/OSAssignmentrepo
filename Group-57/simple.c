@@ -220,19 +220,6 @@ void submit_task(char * file_name)
                 sh_ptr->process_table[i].flag = -1 ;                                                   // terminated or unused ultimately might mean the same thing
                 gettimeofday(&sh_ptr->process_table[i].termination_time , NULL) ;
                 printf("Start_time  %ld\n" ,sh_ptr->process_table[i].start_time.tv_sec) ;
-                sh_ptr->count-- ;
-                if(sh_ptr->count == 0)
-                {
-                    printf("posting null_sem in submit_task\n") ;
-                    sem_wait(&(sh_ptr->null_sem)) ;                                                    
-                }
-                printf("Top %d\n" , sh_ptr->termination_top) ;
-                sh_ptr->termination_queue[sh_ptr->termination_top] = sh_ptr->process_table[i] ;          // copy but does it matter , no . no semaphore required maybe               
-                sh_ptr->termination_top ++ ;
-                printf("\nTermination top %d \n\n" , sh_ptr->termination_top) ;
-                printf("Hey\n") ;
-                printf("In submit_task child 1 TERMINATION QUEUE\n");
-
                 int k = 0 ;
                 while(k < sh_ptr->termination_top)
                 {
@@ -305,20 +292,19 @@ void simple_scheduler(){                                                        
         sem_wait(&(sh_ptr->null_sem)) ;  
         printf("Entering null_sem in scheduler \n") ;  
         sem_post(&(sh_ptr->null_sem)) ;                                                                                   // wait for shell to submit a task
-        printf("In scheduler/n/n") ;                                                                            // wait for shell to submit a task
-        sem_wait(&(sh_ptr->sem)) ; 
-        printf("entering sem in scheduler \n") ;  
-                                                                                           // wait for shell to submit a task    
+        printf("In scheduler\n\n") ;                                                                            // wait for shell to submit a tas                                                                                         // wait for shell to submit a task    
 
         for(int j = 0 ;  j < sh_ptr->ncpu ; j ++)
         {
-
+            printf("Atleast I am here\n") ;
+            sem_wait(&(sh_ptr->sem)) ; 
+            printf("entering sem in scheduler \n") ; 
             sem_wait(&(sh_ptr->ready_queue.sem)) ;
-            printf("Entering run sem in simpleshed ") ; 
-                printf("For %d time in SimpleSheduler READY QUEUE\n"  , j ) ;
+            printf("1 . Entering run sem in simpleshed\n") ; 
+                printf("1 . For %d time in SimpleSheduler READY QUEUE\n"  , j ) ;
                 sh_ptr->ready_queue.display(&sh_ptr->ready_queue) ;
                 task * t = sh_ptr->ready_queue.dequeue(&(sh_ptr->ready_queue)) ;  
-            printf("Leaving run sem in simplesched\n");
+            printf("1. Leaving run sem in simplesched\n");
             sem_post(&(sh_ptr->ready_queue.sem)) ;                                        // by default , dequeue returns the front element
             if(t == NULL){
                 printf("In simple_scheduler , ready  dequeue returned NULL for %d time \n" , j ) ;
@@ -340,13 +326,12 @@ void simple_scheduler(){                                                        
             //printf("\n %s continued\n" , t->file_name);                                                                                    // running
             sh_ptr->running_queue.enqueue(&(sh_ptr->running_queue) , t) ;   
             printf("Displaying running queue\n\n") ; 
-            sh_ptr->running_queue.display(&sh_ptr->running_queue) ;       
-            if( i == ncpu - 1){
-                sem_post(&(sh_ptr->sem)) ;
-                sleep(4) ;                                                                                                                // tslice 
-            }                                                              
+            sh_ptr->running_queue.display(&sh_ptr->running_queue) ;     
+            sem_post(&(sh_ptr->sem)) ;                                                           
         }
         printf("After SimpleScheduler\n") ;
+        
+        usleep(30) ;                                                                                                                // tslice  
 
 
         sem_wait(&(sh_ptr->ready_queue.sem)) ;  
@@ -371,8 +356,8 @@ void simple_scheduler(){                                                        
                     printf("Entering run sem in simpleshed\n") ;                                                         // check for termination of processes in running queue
                     printf("In while\n") ;
                     sh_ptr->running_queue.display(&sh_ptr->running_queue) ;
-                    printf("HEY\n") ;
                     task * t = sh_ptr->running_queue.dequeue(&(sh_ptr->running_queue)) ;
+                    kill(t->pid , SIGSTOP) ; 
                     printf("Leaving run sem in simplesched\n");
                 sem_post(&(sh_ptr->running_queue.sem)) ;
                 printf("%d\n" , t->pid) ;
@@ -388,8 +373,7 @@ void simple_scheduler(){                                                        
                 printf("HEy\n") ;
                 if(t->flag == 1){                                                       // not entering 
                     printf("Heya\n\n") ;
-                    t->flag = 0 ;
-                    kill(t->pid , SIGSTOP) ;    
+                    t->flag = 0 ;   
                     printf("\n%s\n" , t->file_name)  ;   
                     sem_wait(&sh_ptr->ready_queue.sem)  ;  
                         printf("entering ready sem\n")        ;                                            // process  will be stopped until it is continued by the scheduler .
@@ -400,6 +384,19 @@ void simple_scheduler(){                                                        
                         printf("leaving ready sem\n") ;
                     sem_post(&sh_ptr->ready_queue.sem) ;
 
+                }
+                else if(t->flag == -1 ){
+                    sh_ptr->count-- ;
+                if(sh_ptr->count == 0)                                                                   // *** important ***
+                {
+                    printf("posting null_sem in scheduler for empty\n") ;
+                    sem_wait(&(sh_ptr->null_sem)) ;                                                    
+                }
+                printf("Top %d\n" , sh_ptr->termination_top) ;
+                sh_ptr->termination_queue[sh_ptr->termination_top] = sh_ptr->process_table[i] ;          // copy but does it matter , no . no semaphore required maybe               
+                sh_ptr->termination_top ++ ;
+                printf("\nTermination top %d \n\n" , sh_ptr->termination_top) ;
+                printf("In submit_task child 1 TERMINATION QUEUE\n");
                 }
 
 }
@@ -477,6 +474,7 @@ int shell_execute(char ** args){
 void shell_handler(int sig)
 {                                                                      // signal handler for shell process
             if(sig == SIGINT){
+                sem_wait(&(sh_ptr->null_sem)) ;
                 kill(sh_ptr->scheduler_pid, SIGTERM);                                             // since it is a deamon process , we will not get its output ??
                 write(STDOUT_FILENO , "\n1 . Killed Scheduler" , 22) ; 
                 wait(NULL) ;     
@@ -521,7 +519,7 @@ void shell_loop(){
                 else
                 {
                     sh_ptr->scheduler_pid = scheduler_pid ; 
-                    printf("shptr -> scheduler %d"  , scheduler_pid) ;                               //setting the scheduler pid in shared memory , no semaphore required
+                    printf("shptr -> scheduler %d\n\n\n"  , scheduler_pid) ;                               //setting the scheduler pid in shared memory , no semaphore required
                     _exit(0) ; 
                 }
                 /* calculate time of daemon and its ex-parent to rectify if not working properly */
