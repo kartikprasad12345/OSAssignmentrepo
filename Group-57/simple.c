@@ -165,6 +165,7 @@ void submit_task(char * file_name)
             fflush(stdout) ;
             char *arr = (char *)malloc(sizeof(char) * (strlen(t->file_name) + 2));
             strcpy(arr, "./");
+            sleep(5) ;
             strcat(arr, t->file_name);                                    // to be changed later
             char *args[] = {"./fib", "2", NULL};
             execvp(args[0], args);
@@ -239,6 +240,7 @@ void submit_task(char * file_name)
                 while(k < sh_ptr->termination_top)
                 {
                     printf("PROCESS %d  TERMINATION QUEUE\n" , k + 1);
+                    //printf("Pid of the process %d" , sh_ptr->termination_queue[k].pid) ;
                     printf("Process %s\n" , sh_ptr->termination_queue[k].file_name) ;
                     printf("Waiting Time %f\n" , sh_ptr->termination_queue[k].waiting_time) ;
                     double execution_time = (sh_ptr->termination_queue[k].termination_time.tv_sec - sh_ptr->termination_queue[k].start_time.tv_sec) * 1000.0
@@ -248,7 +250,7 @@ void submit_task(char * file_name)
                     printf("\n\n") ;
                     k++ ;
                 }
-            printf("Leaving semaphore in submit_task\n");
+            printf("Hey , Leaving semaphore in submit_task\n");
             sem_post(&(sh_ptr->sem)) ;
             free(t->file_name) ;
             free(t) ;
@@ -325,7 +327,7 @@ void simple_scheduler(){                                                        
                 printf("In simple_scheduler , ready  dequeue returned NULL for %d time \n" , j ) ;
                 printf("Leaving semaphore in simple_scheduler in break statement\n") ;
                 sem_post(&(sh_ptr->sem)) ;
-                usleep(30) ;                                                                                                                // tslice
+                sleep(4) ;                                                                                                                // tslice
                 break ;
             }
             t->flag = 1 ;     
@@ -344,7 +346,7 @@ void simple_scheduler(){                                                        
             sh_ptr->running_queue.display(&sh_ptr->running_queue) ;       
             if( i == ncpu - 1){
                 sem_post(&(sh_ptr->sem)) ;
-                usleep(30) ;                                                                                                                // tslice 
+                sleep(4) ;                                                                                                                // tslice 
             }                                                              
         }
         printf("After SimpleScheduler\n") ;
