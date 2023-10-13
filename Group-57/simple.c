@@ -331,7 +331,7 @@ void simple_scheduler(){                                                        
         }
         printf("After SimpleScheduler\n") ;
         
-        usleep(30) ;                                                                                                                // tslice  
+        sleep(4)  ; // tslice  
 
 
         sem_wait(&(sh_ptr->ready_queue.sem)) ;  
@@ -480,7 +480,7 @@ void shell_handler(int sig)
                 wait(NULL) ;     
                 // print the contents maybe here , by the main shell as daemon maybe cannot print ??
                 write(STDOUT_FILENO , "\n2 . Killed shell\n" , 19) ; 
-                kill(getppid(), SIGKILL) ;
+                kill(getppid(), SIGTERM) ;
             }
 }
 
