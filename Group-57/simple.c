@@ -126,7 +126,8 @@ shm_t * setup()
 
 void submit_task(char * file_name)
 {
-    if(fork() == 0){                                                                 // shared memory is available in all child processes .
+    if(fork() == 0){   
+        printf("In submit task pid child1 : %d" , getpid()) ;                                                              // shared memory is available in all child processes .
         task * t = (task *)malloc(sizeof(task)) ;
         if(t == NULL){
             printf("In submit_task , malloc failed for task %s\n" , file_name) ;
@@ -149,7 +150,7 @@ void submit_task(char * file_name)
         {                                                    
             printf("\npid_grandchild %d pid of the process %d \n" , pid_grandchild , getpid()) ;                                        
             t->pid = pid_grandchild ;
-            //kill(pid_grandchild , SIGSTOP) ;        
+            kill(pid_grandchild , SIGSTOP) ;        
             printf("Process %s grandchild_pid %d start_time %ld flag : %d\n" , t->file_name , t->pid , t->start_time.tv_sec, t->flag) ;                                
             printf("Still in submit_task\n") ;
         }
@@ -322,10 +323,12 @@ void simple_scheduler(){                                                        
             sem_post(&(sh_ptr->ready_queue.sem)) ;                                        // by default , dequeue returns the front element
             if(t == NULL){
                 printf("In simple_scheduler , ready  dequeue returned NULL for %d time \n" , j ) ;
+                printf("Leaving semaphore in simple_scheduler in break statement\n") ;
+                sem_post(&(sh_ptr->sem)) ;
+                usleep(30) ;                                                                                                                // tslice
                 break ;
             }
             t->flag = 1 ;     
-            printf("Hey\n") ;
             printf("%d\n" , t->pid ) ;
             kill(t->pid , SIGCONT) ;     
             waitpid(t->pid, NULL, WNOHANG) ;
@@ -378,18 +381,17 @@ void simple_scheduler(){                                                        
                 printf("( %s )\n" , t->file_name) ;
                 printf("FLAG : %d\n" , t->flag) ;
                 //printf("Start time : ( %ld  ) " , t->start_time.tv_sec) ;
-                if(t = NULL){
+                if(t == NULL){
                     printf("Problem in implementation\n") ;
                 }
                 //printf("\n\n%s\n" , t->file_name)  ;
-                printf("HEY\n") ;
                 printf("%d" , t->flag) ;
                 printf("HEy\n") ;
                 if(t->flag == 1){                                                       // not entering 
                     printf("Heya\n\n") ;
                     t->flag = 0 ;
                     kill(t->pid , SIGSTOP) ;    
-                    printf("\n\n%s\n" , t->file_name)  ;   
+                    printf("\n%s\n" , t->file_name)  ;   
                     sem_wait(&sh_ptr->ready_queue.sem)  ;  
                         printf("entering ready sem\n")        ;                                            // process  will be stopped until it is continued by the scheduler .
                         sh_ptr->ready_queue.enqueue(&(sh_ptr->ready_queue) , t) ;
@@ -426,7 +428,7 @@ char ** shell_split_line(char *line){
         char **tokens = malloc(bufsize * sizeof(char*)) ;
         char *token = strtok(line, " ") ; ;
         if(!tokens){
-            fprintf(stderr, "shell: allocation error\n") ;
+            printf("shell: allocation error\n") ;
             exit(EXIT_FAILURE) ;
         }
         while(token != NULL){
@@ -498,7 +500,9 @@ void shell_loop(){
 
         else if (status == 0)
         {
-                int scheduler_pid  = fork() ;                                                                               // deamon process
+                printf("Pid of child_1 %d\n" , getpid()) ;
+                int scheduler_pid  = fork() ;    
+                printf("Pid of scheduler %d \n" , scheduler_pid) ;                                                              // deamon process
                 if(scheduler_pid < 0 )
                 {
                     printf("bad scheduler process\n") ;
@@ -517,7 +521,8 @@ void shell_loop(){
                 }
                 else
                 {
-                    sh_ptr->scheduler_pid = scheduler_pid ;                                //setting the scheduler pid in shared memory , no semaphore required
+                    sh_ptr->scheduler_pid = scheduler_pid ; 
+                    printf("shptr -> scheduler %d"  , scheduler_pid) ;                               //setting the scheduler pid in shared memory , no semaphore required
                     _exit(0) ; 
                 }
                 /* calculate time of daemon and its ex-parent to rectify if not working properly */
