@@ -329,10 +329,11 @@ void simple_scheduler(){                                                        
             sh_ptr->running_queue.display(&sh_ptr->running_queue) ;     
             sem_post(&(sh_ptr->sem)) ;                                                           
         }
-        printf("After SimpleScheduler\n") ;
+        printf("before sleeping for tslice\n You can enter a task here though \n") ;
         
-        sleep(4)  ; // tslice  
+        sleep(8)  ; // tslice  
 
+        printf("And after\n");
 
         sem_wait(&(sh_ptr->ready_queue.sem)) ;  
         printf("Entering run sem in simpleshed\n") ; 
@@ -480,7 +481,7 @@ void shell_handler(int sig)
                 wait(NULL) ;     
                 // print the contents maybe here , by the main shell as daemon maybe cannot print ??
                 write(STDOUT_FILENO , "\n2 . Killed shell\n" , 19) ; 
-                kill(getppid(), SIGTERM) ;
+                kill(getppid(), SIGKILL) ;
             }
 }
 
