@@ -212,6 +212,8 @@ void submit_task(char * file_name)
                 printf("\n\n");
                 printf("Leaving semaphore in submit task\n");
              sem_post(&(sh_ptr->sem)) ;
+
+
                 int wstatus ;
                 printf("\nWaiting for %d \n" , t->pid);                                               //*** waiting for the child process *** 
                 waitpid(t->pid, &wstatus , 0) ;
@@ -304,14 +306,14 @@ void scheduler_handler(int sig){                                                
 
 void simple_scheduler(){                                                                                               // open shared memory in simple_scheduler process .
     while(1)
-    {          
+    {   printf("Waiting for post \n\n") ;
         sem_wait(&(sh_ptr->null_sem)) ;  
-        printf("entering null_sem in scheduler \n") ;                                                                                     // wait for shell to submit a task
+        printf("entering null_sem in scheduler \n") ;  
+        sem_post(&(sh_ptr->null_sem)) ;                                                                                   // wait for shell to submit a task
         printf("In scheduler/n/n") ;                                                                            // wait for shell to submit a task
         sem_wait(&(sh_ptr->sem)) ; 
         printf("entering sem in scheduler \n") ;  
-                                                                                           // wait for shell to submit a task
-        sem_post(&(sh_ptr->null_sem)) ;    
+                                                                                           // wait for shell to submit a task    
 
         for(int j = 0 ;  j < sh_ptr->ncpu ; j ++)
         {
@@ -534,7 +536,7 @@ void shell_loop(){
             struct sigaction sig ; 
             memset(&sig, 0, sizeof(sig)) ;
             sig.sa_handler = shell_handler ;
-            if(fork() == 0){ sigaction(SIGINT, &sig, NULL) ;}
+            if(fork() == 0){ sigaction(SIGINT, &sig, NULL) ; exit(0) ;}
             
             do
             {
