@@ -529,7 +529,7 @@ void shell_loop(){
             struct sigaction sig ; 
             memset(&sig, 0, sizeof(sig)) ;
             sig.sa_handler = shell_handler ;
-            if(fork() == 0){ sigaction(SIGINT, &sig, NULL) ; exit(0) ;}
+            sigaction(SIGINT, &sig, NULL) ;
             
             do
             {
