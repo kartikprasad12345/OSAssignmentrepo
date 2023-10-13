@@ -162,14 +162,9 @@ void submit_task(char * file_name)
         if (pid_grandchild == 0) 
         {
             printf("\nExecuting %s\n", t->file_name);
-            fflush(stdout) ;
-            char *arr = (char *)malloc(sizeof(char) * (strlen(t->file_name) + 2));
-            strcpy(arr, "./");
-            sleep(5) ;
-            strcat(arr, t->file_name);                                    // to be changed later
-            char *args[] = {"./fib", "2", NULL};
+            fflush(stdout) ;                                   // to be changed later
+            char *args[] = { file_name , NULL};
             execvp(args[0], args);
-            free(arr);
             printf("Error in executing file %s\n", t->file_name);
         }
 
@@ -308,7 +303,7 @@ void simple_scheduler(){                                                        
     while(1)
     {   printf("Waiting for post \n\n") ;
         sem_wait(&(sh_ptr->null_sem)) ;  
-        printf("entering null_sem in scheduler \n") ;  
+        printf("Entering null_sem in scheduler \n") ;  
         sem_post(&(sh_ptr->null_sem)) ;                                                                                   // wait for shell to submit a task
         printf("In scheduler/n/n") ;                                                                            // wait for shell to submit a task
         sem_wait(&(sh_ptr->sem)) ; 
