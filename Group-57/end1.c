@@ -310,7 +310,9 @@ void scheduler_handler(int sig)
 void simple_scheduler(){                                                                                               // open shared memory in simple_scheduler process .
     while(1)
     {   printf("Waiting for post \n\n") ;
-        sem_wait(&(sh_ptr->null_sem)) ;                                                                            // wait for shell to submit a task
+    printf("000000000000000000000\n");
+        sem_wait(&(sh_ptr->null_sem)) ;     
+        printf("000000000000000000000\n");                                                                       // wait for shell to submit a task
         printf("In scheduler\n\n") ;                                                                            // wait for shell to submit a tas                                                                                         // wait for shell to submit a task    
 
         for(int j = 0 ;  j < sh_ptr->ncpu ; j ++)
@@ -320,6 +322,7 @@ void simple_scheduler(){                                                        
             printf("1 . Entering run sem in simpleshed\n") ; 
             task * t=NULL;
             for(int i=4;i>=1;i--){
+                printf("000000000000000000000\n");
                 if(i==4){
                     t = sh_ptr->ready_queue3.dequeue(&(sh_ptr->ready_queue3)) ;
                     if(t==NULL){
@@ -733,6 +736,7 @@ void shell_handler(int sig)
 
 void shell_loop(){
         int status = fork() ;
+        // printf("********************\n");
         char *  cmd_line ;
         char ** args ;
         shm_t * sh_ptr = setup() ;
@@ -744,6 +748,7 @@ void shell_loop(){
 
         else if (status == 0)
         {
+            printf("********$$$$$*******\n");
                 int scheduler_pid  = fork() ;                                                                // deamon process
                 if(scheduler_pid < 0 )
                 {
@@ -758,7 +763,8 @@ void shell_loop(){
                     sigaction(SIGINT, &sig, NULL) ;
 
                     int scheduler_shm_fd = shm_open("Process_Table", O_RDWR, 0);
-                    shm_t* sh_ptr = mmap(NULL, sizeof(shm_t), PROT_READ | PROT_WRITE, MAP_SHARED, scheduler_shm_fd, 0);                                                                 // open shared memory in simple_scheduler process  .
+                    //shm_t* sh_ptr = mmap(NULL, sizeof(shm_t), PROT_READ | PROT_WRITE, MAP_SHARED, scheduler_shm_fd, 0);                 
+                    printf("$$$$$$$$$$$$\n");                                                // open shared memory in simple_scheduler process  .
                     simple_scheduler() ;                                                                                    //scheduler function
                 }
                 else
@@ -805,6 +811,15 @@ int main(int argc , char * argv[] )
     sh_ptr->ready_queue.front = 0 ;
     sh_ptr->ready_queue.rear = MAX_PID - 1  ;
     sh_ptr->ready_queue.size = 0 ;
+    sh_ptr->ready_queue1.front = 0 ;
+    sh_ptr->ready_queue1.rear = MAX_PID - 1  ;
+    sh_ptr->ready_queue1.size = 0 ;
+    sh_ptr->ready_queue2.front = 0 ;
+    sh_ptr->ready_queue2.rear = MAX_PID - 1  ;
+    sh_ptr->ready_queue2.size = 0 ;
+    sh_ptr->ready_queue3.front = 0 ;
+    sh_ptr->ready_queue3.rear = MAX_PID - 1  ;
+    sh_ptr->ready_queue3.size = 0 ;
     sh_ptr->running_queue.front = 0 ;
     sh_ptr->running_queue.rear = MAX_PID - 1 ;
     sh_ptr->running_queue.size = 0 ;
