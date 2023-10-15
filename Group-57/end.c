@@ -330,7 +330,10 @@ void simple_scheduler(){                                                        
                 sem_wait(&(sh_ptr->sem)) ;
                 printf("flag in simple scheduler : %d  %d\n" , t->flag , t->pid) ;
                 printf("setting waiting time \n");
-                    t->waiting_time += doublle(sh_ptr->tslice) ;        // add tslice in each task present in the ready queue with flag = 0
+                if(t->flag == 0)
+                {
+                    t->waiting_time += (double)sh_ptr->tslice ;        // add tslice in each task present in the ready queue with flag = 0
+                }
                 sem_post(&(sh_ptr->sem)) ;
                 r = (r - 1) % MAX_PID ;
             } 
@@ -529,9 +532,7 @@ void shell_loop(){
 
         else if (status == 0)
         {
-                printf("Pid of child_1 %d\n" , getpid()) ;
-                int scheduler_pid  = fork() ;    
-                printf("Pid of scheduler %d \n" , scheduler_pid) ;                                                              // deamon process
+                int scheduler_pid  = fork() ;                                                                // deamon process
                 if(scheduler_pid < 0 )
                 {
                     printf("bad scheduler process\n") ;
@@ -550,8 +551,7 @@ void shell_loop(){
                 }
                 else
                 {
-                    sh_ptr->scheduler_pid = scheduler_pid ; 
-                    printf("shptr -> scheduler %d\n\n\n"  , scheduler_pid) ;                               //setting the scheduler pid in shared memory , no semaphore required
+                    sh_ptr->scheduler_pid = scheduler_pid ;                               //setting the scheduler pid in shared memory , no semaphore required
                     _exit(0) ; 
                 }
                 /* calculate time of daemon and its ex-parent to rectify if not working properly */
