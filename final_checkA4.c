@@ -42,7 +42,6 @@ void handle_buserror(int signum , siginfo_t *info, void *context){
     void * fault_addr = info->si_addr;
     void * start_addr = (void *)(((unsigned long)fault_addr & ~(PAGE_SIZE - 1)));
     printf("Start address = %p\n", start_addr);
-    printf("Segment address = %p\n", segments[i].addr);
     printf("Fault Address = %p\n", fault_addr);
     void * alloc_addr = mmap(start_addr, PAGE_SIZE, PROT_READ|PROT_WRITE|PROT_EXEC , MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS , -1, 0);
     j++ ; 
