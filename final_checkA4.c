@@ -45,9 +45,6 @@ void handle_buserror(int signum , siginfo_t *info, void *context){
     printf("Fault Address = %p\n", fault_addr);
     void * alloc_addr = mmap(start_addr, PAGE_SIZE, PROT_READ|PROT_WRITE|PROT_EXEC , MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS , -1, 0);
     j++ ; 
-    if(j == 5){
-        kill(getpid(), SIGSTOP) ;
-    }
 
 }
 // If the page is already allocated ,  then it wont enter the signal handler so we dont need to handle that .
