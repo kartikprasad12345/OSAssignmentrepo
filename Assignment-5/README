@@ -1,0 +1,14 @@
+Assignment-5
+Group-57
+Members:
+Kartik Prasad(2022240)
+Keshav Chabbra(2022247)
+Description:
+The parallel_for divides the vector of matrix into chunks depending upon the number of threads and number of elements in the container. The functions thread_func_matrix and function_for_thread_vector are used for calculating the sum of one chunk with the help of lambda expression already defined in vector.cpp and matrix.cpp.We assign these computation to individual threads. The user defined struct is used to store the upper and lower limit of an individual chunk.Finally we wait for each thread to finish and then add all of the data up.
+Contribution:
+Kartik Prasad(2022240):
+Made the README file for this assignment
+Wrote the code for parallel_for in case of vector implementation
+Keshav Chhabra(2022247):
+Wrote the code for parallel_for in case of matrix implementation
+Calculated the execution time for both cases
